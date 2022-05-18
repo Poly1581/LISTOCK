@@ -3,6 +3,7 @@
 
 #include <string>
 #include <sstream>
+#include <fstream>
 #include <iostream>
 #include "dateStruct.hpp"
 #include "timeStruct.hpp"
@@ -10,6 +11,7 @@
 using namespace std;
 
 struct pricePoint {
+	string datetime;
 	dateStruct date;
 	timeStruct time;
 
@@ -37,6 +39,8 @@ struct pricePoint {
 		timeStruct t(timeStream);
 		time = t;
 		
+		datetime = dateString+" "+timeString;
+
 		string value;
 		getline(line,value,',');
 		open = stod(value);
@@ -69,8 +73,18 @@ struct pricePoint {
 		cout << "\thigh: " << high << endl;
 		cout << "\tlow: " << low << endl;
 		cout << "\tvolume: " << volume << endl;
-
 	};
+
+	void writeToCSV(ofstream& stockCSV) {
+		stockCSV << datetime << ",";
+		stockCSV << open << ",";
+		stockCSV << high << ",";
+		stockCSV << low << ",";
+		stockCSV << close << ",";
+		stockCSV << adjClose << ",";
+		stockCSV << volume << ",";
+		stockCSV << length << endl;
+	}
 };
 
 #endif //__PRICE_POINT_HPP__

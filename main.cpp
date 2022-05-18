@@ -18,20 +18,23 @@ void clearAllStockData(void) {
 int main() {
 	vector<string> stocks = {"AAPL", "MSFT", "GOOG", "AMZN", "TSLA", "V"};
 	vector<stockPrice> prices;
-	string timescale = "5d";
-	string resolution = "5m";
-	int windowSize = 12;
+	string timescale = "7d";
+	string resolution = "1m";
+	int windowSize = 60;
+	auto start = chrono::high_resolution_clock::now();
 	for(int i = 0; i < stocks.size(); i++) {
 		stockPrice temp(stocks.at(i), timescale, resolution, windowSize);
 		temp.deleteData();
 		temp.initData();
+		temp.writeToCSV();
 		prices.push_back(temp);
 	}
-	for(int i = 0; i < prices.size(); i++) {
-		cout << prices.at(i).ticker << endl;
-		cout << "\tCURR PRICE: " << prices.at(i).pricePoints.back()->close << endl;
-		cout << "\tCURR LIS: " << prices.at(i).pricePoints.back()->length << endl;
-	}
+	auto stop = chrono::high_resolution_clock::now();
+	auto duration = chrono::duration_cast<chrono::microseconds>(stop-start);
+	double seconds = duration.count()/1000000.0;
+	cout << "EXECUTION TOOK " << seconds << " SECONDS" << endl;
+	prices.at(0).plot();
+	prices.back().plot();
 	cout << "FINISHED TEST" << endl;
 	clearAllStockData();
 	return 0;

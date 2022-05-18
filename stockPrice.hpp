@@ -27,16 +27,20 @@ struct stockPrice {
 	string updateCommand;
 	string initFileName;
 	string initCommand;
+	string LISFileName;
+	string LISPlotCommand;
 	string deleteCommand;
 
 	vector<pricePoint*> pricePoints;
 
 	stockPrice(string t, string ts, string res, int ws) : ticker(t), timescale(ts), resolution(res), windowSize(ws), left(0), right(-1){
-		updateFileName = ticker+"|5m|5m.csv";
-		updateCommand = "python3 PYLISTOCK.py " + ticker + " 5m 5m";
+		updateFileName = ticker+"|1m|1m.csv";
+		updateCommand = "python3 PYLISTOCK.py " + ticker + " 1m 1m";
 		initFileName = ticker+"|"+timescale+"|"+resolution+".csv";
 		initCommand = "python3 PYLISTOCK.py " + ticker + " " + timescale + " " + resolution;
-		deleteCommand = "rm "+updateFileName+" && "+"rm "+initFileName;
+		LISFileName = ticker+"|LIS.csv";
+		LISPlotCommand = "python3 PLOT.py "+LISFileName;
+		deleteCommand = "rm "+updateFileName+" && rm "+initFileName+" && rm "+LISFileName;
 	};
 	
 	~stockPrice() {
@@ -51,13 +55,20 @@ struct stockPrice {
 
 	void calcLIS(void) {
 		pricePoint* rightPricePoint = pricePoints.at(right);
+		//			FULL LIS
+		// for(int i = 0; i < pricePoints.size(); i++) {
+		// 	pricePoint* currPricePoint = pricePoints.at(i);
+		// 	if(currPricePoint->close < pricePoints.back()->close) {
+		// 		pricePoints.back()->length = max(pricePoints.back()->length, currPricePoint->length+1);
+		// 	}
+		// }
+
+
+		//			WINDOWED LIS
 		for(int i = left; i < right; i++) {
-			pricePoint* leftPricePoint = pricePoints.at(left);
-			if(leftPricePoint->close < rightPricePoint->close) {
-				cout << "INCREASING" << endl;
-				cout << "PREVIOUS LENGTH: " << rightPricePoint->length << endl;
-				rightPricePoint->length = max(rightPricePoint->length, leftPricePoint->length+1);
-				cout << "NEW LENGTH: " << rightPricePoint->length << endl;
+			pricePoint* currPricePoint = pricePoints.at(i);
+			if(currPricePoint->close < rightPricePoint->close) {
+				rightPricePoint->length = max(rightPricePoint->length, currPricePoint->length+1);
 			}
 		}
 	};
@@ -68,11 +79,6 @@ struct stockPrice {
 		if((right - left) > windowSize) {
 			left++;
 		}
-		cout << "ADDED POINT" << endl;
-		cout << "\tLEFT: " << left << endl;
-		cout << "\tRIGHT: " << right << endl;
-		cout << "\tWINDOWSIZE: " << windowSize << endl;
-		cout << "\tVECTORSIZE: " << pricePoints.size() << endl;
 		calcLIS();
 	};
 
@@ -88,9 +94,7 @@ struct stockPrice {
 		getline(stockCSV, lineString);
 		while(getline(stockCSV, lineString)) {
 			stringstream lineStream(lineString);
-			pricePoint* currPricePoint = new pricePoint(lineStream);
-			addSinglePricePoint(currPricePoint);
-			calcLIS();
+			addSinglePricePoint(new pricePoint(lineStream));
 		}
 	};
 
@@ -113,7 +117,28 @@ struct stockPrice {
 		} else {
 			delete currPricePoint;
 		}
+		stockCSV.close();
 	};
+
+	void writeToCSV(void) {
+		string header = "Datetime,Open,High,Low,Close,Adj Close,Volume,LIS";
+		ofstream stockCSV;
+		stockCSV.open(LISFileName);
+		if(!stockCSV.is_open()) {
+			cout << "ERROR OPENING " << LISFileName << endl;
+			return;
+		}
+		stockCSV << header << endl;
+		for(int i = 0; i < pricePoints.size(); i++) {
+			pricePoints.at(i)->writeToCSV(stockCSV);
+		}
+		stockCSV.close();
+	};
+
+	void plot(void) {
+		writeToCSV();
+		system(LISPlotCommand.c_str());
+	}
 };
 
 #endif //__STOCK_PRICE_HPP__

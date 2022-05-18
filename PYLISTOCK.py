@@ -2,10 +2,11 @@ import sys
 import numpy as np
 import pandas as pd
 import yfinance as yf
-from datetime import datetime as dt
+import datetime as dt
+import plotly.graph_objects as go
 
 t = "UBER"
-p = "5d"
+p = "1d"
 i = "5m"
 if len(sys.argv) == 4 :
 	t = sys.argv[1]
