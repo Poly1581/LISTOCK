@@ -14,4 +14,4 @@ if len(sys.argv) == 4 :
 	i = sys.argv[3]
 
 data = yf.download(tickers=t, period=p, interval=i)
-data.to_csv(t+"|"+p+"|"+i+".csv")
+data.to_csv(t+"-"+p+"-"+i+".csv")

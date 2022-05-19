@@ -31,50 +31,58 @@ struct stockPrice {
 	string LISPlotCommand;
 	string deleteCommand;
 
-	vector<pricePoint*> pricePoints;
+	//		DE-POINTERIZED
+	vector<pricePoint> pricePoints;
 
 	stockPrice(string t, string ts, string res, int ws) : ticker(t), timescale(ts), resolution(res), windowSize(ws), left(0), right(-1){
-		updateFileName = ticker+"|1m|1m.csv";
+		updateFileName = ticker+"-1m-1m.csv";
 		updateCommand = "python3 PYLISTOCK.py " + ticker + " 1m 1m";
-		initFileName = ticker+"|"+timescale+"|"+resolution+".csv";
+		initFileName = ticker+"-"+timescale+"-"+resolution+".csv";
 		initCommand = "python3 PYLISTOCK.py " + ticker + " " + timescale + " " + resolution;
-		LISFileName = ticker+"|LIS.csv";
+		LISFileName = ticker+"-LIS.csv";
 		LISPlotCommand = "python3 PLOT.py "+LISFileName;
 		deleteCommand = "rm "+updateFileName+" && rm "+initFileName+" && rm "+LISFileName;
 	};
-	
-	~stockPrice() {
-		for(int i = 0; i < pricePoints.size(); i++) {
-			delete pricePoints.at(i);
-		}
-	}
 
 	void deleteData(void) {
 		system(deleteCommand.c_str());
 	};
 
+
+	//		DE-POINTERIZED
 	void calcLIS(void) {
-		pricePoint* rightPricePoint = pricePoints.at(right);
+		pricePoint& rightPricePoint = pricePoints.at(right);
 		//			FULL LIS
 		// for(int i = 0; i < pricePoints.size(); i++) {
-		// 	pricePoint* currPricePoint = pricePoints.at(i);
-		// 	if(currPricePoint->close < pricePoints.back()->close) {
-		// 		pricePoints.back()->length = max(pricePoints.back()->length, currPricePoint->length+1);
+		// 	pricePoint currPricePoint = pricePoints.at(i);
+		// 	if(currPricePoint.close < pricePoints.back().close) {
+		// 		pricePoints.back().length = max(pricePoints.back().length, currPricePoint.length+1);
 		// 	}
 		// }
 
 
 		//			WINDOWED LIS
 		for(int i = left; i < right; i++) {
-			pricePoint* currPricePoint = pricePoints.at(i);
-			if(currPricePoint->close < rightPricePoint->close) {
-				rightPricePoint->length = max(rightPricePoint->length, currPricePoint->length+1);
+			pricePoint& currPricePoint = pricePoints.at(i);
+			if(currPricePoint.close < rightPricePoint.close) {
+				rightPricePoint.length = max(rightPricePoint.length, currPricePoint.length+1);
 			}
 		}
 	};
 	
-	void addSinglePricePoint(pricePoint* point) {
-		pricePoints.push_back(point);
+
+	//		DE-POINTERIZED
+	void addSinglePricePoint(pricePoint& currPricePoint) {
+		if(pricePoints.size() != 0) {
+			pricePoint& lastPricePoint = pricePoints.back();
+			if( (currPricePoint.date == lastPricePoint.date) && (currPricePoint.time == lastPricePoint.time)) {
+				cout << "\t\tMATCHING DATE AND TIME:" << endl;
+				cout << "\t" << currPricePoint.date.year << "/" << currPricePoint.date.month << "/" << currPricePoint.date.day << endl;
+				cout << "\t" << currPricePoint.time.hour << ":" << currPricePoint.time.minute << ":" << currPricePoint.time.second << endl;
+				return;
+			}
+		}
+		pricePoints.push_back(currPricePoint);
 		right++;
 		if((right - left) > windowSize) {
 			left++;
@@ -82,7 +90,10 @@ struct stockPrice {
 		calcLIS();
 	};
 
+
+	//		DE-POINTERIZED
 	void initData(void) {
+		cout << "Initializing data for " << ticker << endl;
 		system(initCommand.c_str());
 		ifstream stockCSV;
 		stockCSV.open(initFileName);
@@ -94,10 +105,13 @@ struct stockPrice {
 		getline(stockCSV, lineString);
 		while(getline(stockCSV, lineString)) {
 			stringstream lineStream(lineString);
-			addSinglePricePoint(new pricePoint(lineStream));
+			pricePoint newPricePoint(lineStream);
+			addSinglePricePoint(newPricePoint);
 		}
 	};
 
+
+	//		DE-POINTERIZED
 	void updateData(void) {
 		system(updateCommand.c_str());
 		ifstream stockCSV;
@@ -107,19 +121,15 @@ struct stockPrice {
 			return;
 		}
 		string lineString;
-		getline(stockCSV,lineString);
+		getline(stockCSV,lineString);		//		REMOVE HEADER
 		getline(stockCSV,lineString);
 		stringstream lineStream(lineString);
-		pricePoint* currPricePoint = new pricePoint(lineStream);
-		pricePoint* lastPricePoint = pricePoints.back();
-		if( (currPricePoint->date != lastPricePoint->date) || (currPricePoint->time != lastPricePoint->time)) {
-			addSinglePricePoint(currPricePoint);
-		} else {
-			delete currPricePoint;
-		}
+		pricePoint newPricePoint(lineStream);
+		addSinglePricePoint(newPricePoint);
 		stockCSV.close();
 	};
 
+	//		DE-POINTERIZED
 	void writeToCSV(void) {
 		string header = "Datetime,Open,High,Low,Close,Adj Close,Volume,LIS";
 		ofstream stockCSV;
@@ -130,7 +140,7 @@ struct stockPrice {
 		}
 		stockCSV << header << endl;
 		for(int i = 0; i < pricePoints.size(); i++) {
-			pricePoints.at(i)->writeToCSV(stockCSV);
+			pricePoints.at(i).writeToCSV(stockCSV);
 		}
 		stockCSV.close();
 	};

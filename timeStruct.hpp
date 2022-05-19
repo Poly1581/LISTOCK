@@ -7,15 +7,11 @@
 using namespace std;
 
 struct timeStruct {
-	int hour;
-	int minute;
-	int second;
+	int hour = 0;
+	int minute = 0;
+	int second = 0;
 
-	timeStruct(void) {
-		hour = 0;
-		minute = 0;
-		second = 0;
-	};
+	timeStruct(void) {};
 
 	timeStruct(stringstream& time) {
 		string value;

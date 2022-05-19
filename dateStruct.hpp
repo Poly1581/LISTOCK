@@ -8,15 +8,11 @@
 using namespace std;
 
 struct dateStruct {
-	int year;
-	int month;
-	int day;
+	int year = 0;
+	int month = 0;
+	int day = 0;
 
-	dateStruct(void) {
-		year = 0;
-		month = 0;
-		day = 0;
-	};
+	dateStruct(void) {};
 
 	dateStruct(stringstream& date) {
 		string value;

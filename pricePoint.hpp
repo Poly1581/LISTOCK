@@ -15,6 +15,7 @@ struct pricePoint {
 	dateStruct date;
 	timeStruct time;
 
+
 	double open;
 	double close;
 	double adjClose;
