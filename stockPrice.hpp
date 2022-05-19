@@ -51,20 +51,20 @@ struct stockPrice {
 
 	//		DE-POINTERIZED
 	void calcLIS(void) {
-		pricePoint& rightPricePoint = pricePoints.at(right);
 		//			FULL LIS
 		// for(int i = 0; i < pricePoints.size(); i++) {
 		// 	pricePoint currPricePoint = pricePoints.at(i);
 		// 	if(currPricePoint.close < pricePoints.back().close) {
 		// 		pricePoints.back().increasing = max(pricePoints.back().increasing, currPricePoint.increasing+1);
-		// 	} else if(currPricePoint.close > pricePoints.back.close) {
-		// 		pricepoints.back().decreasing = max(pricePoints.back.decreasing, currPricePoint.decreasing+1);
+		// 	} else if(currPricePoint.close > pricePoints.back().close) {
+		// 		pricePoints.back().decreasing = max(pricePoints.back().decreasing, currPricePoint.decreasing+1);
 		// 	}
 		// }
-		// pricePoints.back().sentiment = pricePoints.back().increasing - rightPricePoints.back().decreasing;
+		// pricePoints.back().sentiment = pricePoints.back().increasing - pricePoints.back().decreasing;
 
 
 		//			WINDOWED LIS
+		pricePoint& rightPricePoint = pricePoints.at(right);
 		for(int i = left; i < right; i++) {
 			pricePoint& currPricePoint = pricePoints.at(i);
 			if(currPricePoint.close < rightPricePoint.close) {

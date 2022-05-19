@@ -11,6 +11,8 @@ if len(sys.argv) != 2 :
 
 fileName = sys.argv[1]
 
+ticker = fileName[0:fileName.find("-")]
+
 data = pd.read_csv(fileName)
 
 minValue = min(data["Low"])
@@ -21,20 +23,10 @@ scale = diff/maxLIS
 
 fig = make_subplots(rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.02)
 
-stockdata = fig.add_trace(go.Candlestick(
-	x=data.index,
-	open=data["Open"],
-	high=data["High"],
-	low=data["Low"],
-	close=data["Close"],
-	name="Price History"),
-	row=4,
-	col=1)
-
 LIS = fig.add_trace(go.Scatter(
 	x=data.index,
 	y=data["LIS"],
-	name="LIS Data",
+	name=ticker+" LIS Data",
 	line_color="green"),
 	row=1,
 	col=1)
@@ -42,7 +34,7 @@ LIS = fig.add_trace(go.Scatter(
 LDS = fig.add_trace(go.Scatter(
 	x=data.index,
 	y=data["LDS"],
-	name="LDS Data",
+	name=ticker+" LDS Data",
 	line_color="red"),
 	row=2,
 	col=1)
@@ -50,9 +42,19 @@ LDS = fig.add_trace(go.Scatter(
 Sentiment = fig.add_trace(go.Scatter(
 	x=data.index,
 	y=data["Sentiment"],
-	name="Stock Sentiment",
+	name=ticker+" Stock Sentiment",
 	line_color="grey"),
 	row=3,
+	col=1)
+
+stockdata = fig.add_trace(go.Candlestick(
+	x=data.index,
+	open=data["Open"],
+	high=data["High"],
+	low=data["Low"],
+	close=data["Close"],
+	name=ticker+" Price History"),
+	row=4,
 	col=1)
 
 fig.show()

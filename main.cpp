@@ -20,7 +20,7 @@ int main() {
 	vector<stockPrice> prices;
 	string timescale = "7d";
 	string resolution = "1m";
-	int windowSize = 60;
+	int windowSize = 180;
 	auto start = chrono::high_resolution_clock::now();
 	for(int i = 0; i < stocks.size(); i++) {
 		stockPrice temp(stocks.at(i), timescale, resolution, windowSize);
