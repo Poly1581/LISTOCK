@@ -56,18 +56,24 @@ struct stockPrice {
 		// for(int i = 0; i < pricePoints.size(); i++) {
 		// 	pricePoint currPricePoint = pricePoints.at(i);
 		// 	if(currPricePoint.close < pricePoints.back().close) {
-		// 		pricePoints.back().length = max(pricePoints.back().length, currPricePoint.length+1);
+		// 		pricePoints.back().increasing = max(pricePoints.back().increasing, currPricePoint.increasing+1);
+		// 	} else if(currPricePoint.close > pricePoints.back.close) {
+		// 		pricepoints.back().decreasing = max(pricePoints.back.decreasing, currPricePoint.decreasing+1);
 		// 	}
 		// }
+		// pricePoints.back().sentiment = pricePoints.back().increasing - rightPricePoints.back().decreasing;
 
 
 		//			WINDOWED LIS
 		for(int i = left; i < right; i++) {
 			pricePoint& currPricePoint = pricePoints.at(i);
 			if(currPricePoint.close < rightPricePoint.close) {
-				rightPricePoint.length = max(rightPricePoint.length, currPricePoint.length+1);
+				rightPricePoint.increasing = max(rightPricePoint.increasing, currPricePoint.increasing+1);
+			} else if(currPricePoint.close > rightPricePoint.close) {
+				rightPricePoint.decreasing = max(rightPricePoint.decreasing, currPricePoint.decreasing+1);
 			}
 		}
+		rightPricePoint.sentiment = rightPricePoint.increasing - rightPricePoint.decreasing;
 	};
 	
 
@@ -131,7 +137,7 @@ struct stockPrice {
 
 	//		DE-POINTERIZED
 	void writeToCSV(void) {
-		string header = "Datetime,Open,High,Low,Close,Adj Close,Volume,LIS";
+		string header = "Datetime,Open,High,Low,Close,Adj Close,Volume,LIS,LDS,Sentiment";
 		ofstream stockCSV;
 		stockCSV.open(LISFileName);
 		if(!stockCSV.is_open()) {

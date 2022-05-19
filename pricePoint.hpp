@@ -24,7 +24,9 @@ struct pricePoint {
 
 	int volume;
 
-	int length;
+	int increasing = 0;
+	int decreasing = 0;
+	int sentiment = 0;
 
 	pricePoint(stringstream& line) {
 		string dateString;
@@ -55,7 +57,6 @@ struct pricePoint {
 		adjClose = stod(value);
 		getline(line,value,',');
 		volume = stoi(value);
-		length = 0;
 	};
 
 	void print(void) {
@@ -84,7 +85,9 @@ struct pricePoint {
 		stockCSV << close << ",";
 		stockCSV << adjClose << ",";
 		stockCSV << volume << ",";
-		stockCSV << length << endl;
+		stockCSV << increasing << ",";
+		stockCSV << decreasing << ",";
+		stockCSV << sentiment << endl;
 	}
 };
 

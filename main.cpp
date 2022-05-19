@@ -26,15 +26,14 @@ int main() {
 		stockPrice temp(stocks.at(i), timescale, resolution, windowSize);
 		temp.initData();
 		temp.writeToCSV();
+		temp.plot();
 		prices.push_back(temp);
 	}
 	auto stop = chrono::high_resolution_clock::now();
 	auto duration = chrono::duration_cast<chrono::microseconds>(stop-start);
 	double seconds = duration.count()/1000000.0;
 	cout << "EXECUTION TOOK " << seconds << " SECONDS" << endl;
-	prices.at(0).plot();
-	// prices.back().plot();
 	cout << "FINISHED TEST" << endl;
-	clearAllStockData();
+	// clearAllStockData();
 	return 0;
 }
