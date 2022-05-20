@@ -48,7 +48,6 @@ struct stockPrice {
 		system(deleteCommand.c_str());
 	};
 
-
 	//		DE-POINTERIZED
 	void calcLIS(void) {
 		//			FULL LIS
@@ -149,6 +148,10 @@ struct stockPrice {
 			pricePoints.at(i).writeToCSV(stockCSV);
 		}
 		stockCSV.close();
+	};
+
+	void readFromCSV(void) {
+
 	};
 
 	void plot(void) {
