@@ -24,7 +24,7 @@ struct dateStruct {
 		day = stoi(value);
 	};
 
-	bool operator==(const dateStruct &d) const {
+	bool operator==(const dateStruct &d) const  {
 		return year == d.year && month == d.month && day == d.day;
 	}
 

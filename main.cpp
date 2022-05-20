@@ -21,14 +21,31 @@ int main() {
 	string timescale = "7d";
 	string resolution = "1m";
 	int windowSize = 180;
-	auto start = chrono::high_resolution_clock::now();
 	stockPortfolio portfolio(stocks, timescale, resolution, windowSize);
+
+
+
+	auto startInit = chrono::high_resolution_clock::now();
 	portfolio.initData();
+	auto stopInit = chrono::high_resolution_clock::now();
+	auto Initduration = chrono::duration_cast<chrono::microseconds>(stopInit-startInit);
+	double Initseconds = Initduration.count()/1000000.0;
+	cout << "INIT TOOK " << Initseconds << " SECONDS" << endl;
+
+
+	auto startUpdate = chrono::high_resolution_clock::now();
+	portfolio.updateData();
+	auto stopUpdate = chrono::high_resolution_clock::now();
+	auto Updateduration = chrono::duration_cast<chrono::microseconds>(stopUpdate-startUpdate);
+	double Updateseconds = Updateduration.count()/1000000.0;
+	cout << "UPDATE TOOK " << Updateseconds << " SECONDS" << endl;
+
+
+	auto startPlot = chrono::high_resolution_clock::now();
 	portfolio.plot();
-	auto stop = chrono::high_resolution_clock::now();
-	auto duration = chrono::duration_cast<chrono::microseconds>(stop-start);
-	double seconds = duration.count()/1000000.0;
-	cout << "FINISHED TEST" << endl;
-	cout << "EXECUTION TOOK " << seconds << " SECONDS" << endl;
-	clearAllStockData();
+	auto stopPlot = chrono::high_resolution_clock::now();
+	auto Plotduration = chrono::duration_cast<chrono::microseconds>(stopPlot-startPlot);
+	double Plotseconds = Plotduration.count()/1000000.0;
+	cout << "PlOT TOOK " << Plotseconds << " SECONDS" << endl;
+	// clearAllStockData();
 }

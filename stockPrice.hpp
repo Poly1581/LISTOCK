@@ -19,7 +19,7 @@ struct stockPrice {
 	string ticker;
 	string timescale;
 	string resolution;
-	int windowSize;
+	long unsigned int windowSize;
 	int left;
 	int right;
 
@@ -35,8 +35,8 @@ struct stockPrice {
 	vector<pricePoint> pricePoints;
 
 	stockPrice(string t, string ts, string res, int ws) : ticker(t), timescale(ts), resolution(res), windowSize(ws), left(0), right(-1){
-		updateFileName = ticker+"-1m-1m.csv";
-		updateCommand = "python3 PYLISTOCK.py " + ticker + " 1m 1m";
+		updateFileName = ticker+"-10m-1m.csv";
+		updateCommand = "python3 PYLISTOCK.py " + ticker + " 10m 1m";
 		initFileName = ticker+"-"+timescale+"-"+resolution+".csv";
 		initCommand = "python3 PYLISTOCK.py " + ticker + " " + timescale + " " + resolution;
 		LISFileName = ticker+"-LIS.csv";
@@ -78,15 +78,17 @@ struct stockPrice {
 
 	//		DE-POINTERIZED
 	void addSinglePricePoint(pricePoint& currPricePoint) {
-		if(pricePoints.size() != 0) {
-			pricePoint& lastPricePoint = pricePoints.back();
-			if( (currPricePoint.date == lastPricePoint.date) && (currPricePoint.time == lastPricePoint.time)) {
-				cout << "\t\tMATCHING DATE AND TIME:" << endl;
-				cout << "\t" << currPricePoint.date.year << "/" << currPricePoint.date.month << "/" << currPricePoint.date.day << endl;
-				cout << "\t" << currPricePoint.time.hour << ":" << currPricePoint.time.minute << ":" << currPricePoint.time.second << endl;
-				return;
+		if(pricePoints.size() != 0) {			//		COMPARE NEW PRICE POINT WITH THE LAST LAST FEW, NOT JUST THE LAST ONE
+			for(int i = 0; i < min(windowSize, pricePoints.size()); i++) {
+				pricePoint& prevPricePoint = pricePoints.at(pricePoints.size()-i-1);
+				if((currPricePoint.date == prevPricePoint.date) && (currPricePoint.time == prevPricePoint.time)) {
+					return;
+				}
 			}
 		}
+		// cout << "ADDING NEW DATA: " << endl;
+		// cout << "\t" << currPricePoint.date.year << "/" << currPricePoint.date.month << "/" << currPricePoint.date.day << endl;
+		// cout << "\t" << currPricePoint.time.hour << ":" << currPricePoint.time.minute << ":" << currPricePoint.time.second << endl;
 		pricePoints.push_back(currPricePoint);
 		right++;
 		if((right - left) > windowSize) {
@@ -118,6 +120,7 @@ struct stockPrice {
 
 	//		DE-POINTERIZED
 	void updateData(void) {
+		cout << "Updating data for " << ticker << endl;
 		system(updateCommand.c_str());
 		ifstream stockCSV;
 		stockCSV.open(updateFileName);
@@ -127,10 +130,11 @@ struct stockPrice {
 		}
 		string lineString;
 		getline(stockCSV,lineString);		//		REMOVE HEADER
-		getline(stockCSV,lineString);
-		stringstream lineStream(lineString);
-		pricePoint newPricePoint(lineStream);
-		addSinglePricePoint(newPricePoint);
+		while(getline(stockCSV, lineString)) {
+			stringstream lineStream(lineString);
+			pricePoint newPricePoint(lineStream);
+			addSinglePricePoint(newPricePoint);
+		}
 		stockCSV.close();
 	};
 
